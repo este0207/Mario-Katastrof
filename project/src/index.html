@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Socket.IO Client Example</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+    <input type="text" id="messageInput" placeholder="Enter message">
+    <button onclick="sendMessage()">Send Message</button>
+    <h2>Received Messages:</h2>
+    <ul id="messagesList"></ul>
+
+    <script>
+
+        const socket = io('http://localhost:3000');
+
+        socket.on('connect', () => {
+            logMessage('Connected to server with ID: ' + socket.id);
+        });
+
+        socket.on('disconnect', () => {
+            logMessage('Disconnected from server.');
+        });
+
+        socket.on('connectionConfirmation', (data) => {
+            logMessage('Server: ' + data.message);
+        });
+
+
+        socket.on('messageToClient', (data) => {
+            logMessage('Received from server: ' + JSON.stringify(data));
+        });
+
+        socket.on('broadcastMessage', (data) => {
+            logMessage('Broadcast from another user: ' + JSON.stringify(data));
+        });
+
+        socket.on('globalMessage', (data) => {
+            logMessage('Global message: ' + JSON.stringify(data));
+        });
+        
+        socket.on('gameStateUpdate', (data) => {
+            logMessage('Game State Update: ' + JSON.stringify(data));
+        });
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value;
+            if (message.trim() !== '') {
+                socket.emit('messageToServer', { text: message, sender: 'clientPage' });
+                logMessage('Sent to server: ' + message);
+                messageInput.value = '';
+            }
+        }
+
+        function logMessage(message) {
+            const messagesList = document.getElementById('messagesList');
+            const listItem = document.createElement('li');
+            listItem.textContent = message;
+            messagesList.appendChild(listItem);
+        }
+    </script>
+</body>
+</html> 
